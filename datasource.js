@@ -225,7 +225,7 @@ define([
             }
           }
           // To speed up querying on templatized dashboards.
-          if (templateSrv.variables[1] && templateSrv.variables[1].name === "hosts") {
+          if ((templateSrv.variables.length > 1 && templateSrv.variables[1] && templateSrv.variables[1].name === "hosts") || templateSrv.variables[0].name === "hosts") {
             var splitHosts = []; var allHosts;
             if (templateSrv.index.hosts.current.text === "All") {
               allHosts = templateSrv.index.hosts.options.filter(function(hostName) { return hostName.text !== "All"; })
@@ -249,7 +249,12 @@ define([
           // Non Templatized Dashboards
           metricsPromises = _.map(options.targets, function(target) {
             if (!!target.hosts) {
-              return getHostAppIdData(target);
+                if (target.hosts === "%") {
+                    target.templatedHost = "%";
+                    return getAllHostData(target);
+                } else {
+                    return getHostAppIdData(target);
+                }
             } else {
               return getServiceAppIdData(target);
             }
